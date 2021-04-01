@@ -10,8 +10,9 @@ import java.util.stream.Stream;
 
 public class PrimeCalculator {
     public static void main(String[] args) throws InterruptedException {
-        List<Integer> numbers = Collections.synchronizedList(getNumbers(200000));
-        List<Integer> primes = getPrimes(numbers);
+        int maxPrime = 2_000;
+        List<Integer> numbers = Collections.synchronizedList(getNumbers(maxPrime));
+        List<Integer> primes = getPrimes(numbers, maxPrime);
         Collections.sort(primes);
         primes.stream().map(prime -> prime + "\n").forEach(System.out::print);
     }
@@ -27,10 +28,10 @@ public class PrimeCalculator {
         }).limit(maxPrime).collect(Collectors.toList());
     }
 
-    private static List<Integer> getPrimes(List<Integer> numbers) throws InterruptedException {
+    private static List<Integer> getPrimes(List<Integer> numbers, int maxPrime) throws InterruptedException {
         List<Integer> primeNumbers = Collections.synchronizedList(new ArrayList<>());
-        CountDownLatch latch = new CountDownLatch(numbers.size());
-        ExecutorService executors = Executors.newFixedThreadPool(3000);
+        CountDownLatch latch = new CountDownLatch(maxPrime);
+        ExecutorService executors = Executors.newFixedThreadPool(Math.min(maxPrime / 100, 100));
         for (Integer candidate : numbers) {
             executors.submit(() -> {
                 if (isPrime(candidate)) {
